@@ -24,28 +24,33 @@
  .fnend
 .es_numero:
  .fnstart
-   cmp r4, #0x30 /*compara r4 con 0x30, si es mayor o igual salta a posibleNum*/ 
-   bhe posibleNum
-   cmp r4, #0x2D /*compara si es negativo, #2D = '-'*/
-   beq negativo
+   cmp r4, #0x39 /*compara r4 con 0x39, si es menor o igual, lo almacena, sino error*/ 
+   ble almacenar_nro
+   bl print_mensaje_error
  .fnend
 .es_cuenta:
  .fnstart
-   ldrb r3, =input_usuario
+   ldr r3, =input_usuario
+   ldr r9, =long_input
+   ldr r9, [r9]
+   mov r8, #0 /*r8 = indice*/
    mov r5, #0 /*r5 = va a almacenar el primer valor*/
    mov r6, #0 /*r6 = va a almacenar el segundo valor*/
-   mov r8, #0 /*r8 = indice*/
    ldrb r4, [r3], #1 /*r4 = almacena el valor del caracter, r3 = puntero a input*/
+   cmp r4, #0x2D /*compara si es negativo*/
+   beq negativo 
    bl ciclo_num
  .fnend 
 .ciclo_num:
  .fnstart
-   /*cmp r8, r9 /*r9 = long_input, compara el indice con la long */
+   cmp r8, r9 /*r9 = long_input, compara el indice con la long */
+   beq lr /*tendria que volver a es_cuenta*/
+   add r8, #1 /*guardo en r8 el siguiente indice*/
    cmp r4, #0x30 /*compara r4 con 0x30*/
-   bhi es_numero
+   bhe es_numero
    cmp r4, #0x20 /*compara r4 con espacio*/
    beq lr /*tendria que volver a es_cuenta*/
-   b print_mensaje_error /*si no es un nro ni negativo, imprimo msj de error*/
+   b print_mensaje_error /*si no es un nro ni espacio, imprimo msj de error*/
  .fnend
 .resolver_operacion:
  .fnstart

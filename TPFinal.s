@@ -24,14 +24,29 @@
  .fnend
 .es_numero:
  .fnstart
-   ldrb r1, [r3], #1 /*r1 = almacena el valor del caracter, r3 = puntero a input*/
-   cmp r1, #0x30 /*compara r1 con 0x30, si es mayor o igual salta a posibleNum*/ 
+   cmp r4, #0x30 /*compara r4 con 0x30, si es mayor o igual salta a posibleNum*/ 
    bhe posibleNum
-   cmp r1, #0x2D /*compara si es negativo, #2D = '-'*/
+   cmp r4, #0x2D /*compara si es negativo, #2D = '-'*/
    beq negativo
+ .fnend
+.es_cuenta:
+ .fnstart
+   ldrb r3, =input_usuario
+   mov r5, #0 /*r5 = va a almacenar el primer valor*/
+   mov r6, #0 /*r6 = va a almacenar el segundo valor*/
+   mov r8, #0 /*r8 = indice*/
+   ldrb r4, [r3], #1 /*r4 = almacena el valor del caracter, r3 = puntero a input*/
+   bl ciclo_num
+ .fnend 
+.ciclo_num:
+ .fnstart
+   /*cmp r8, r9 /*r9 = long_input, compara el indice con la long */
+   cmp r4, #0x30 /*compara r4 con 0x30*/
+   bhi es_numero
+   cmp r4, #0x20 /*compara r4 con espacio*/
+   beq lr /*tendria que volver a es_cuenta*/
    b print_mensaje_error /*si no es un nro ni negativo, imprimo msj de error*/
  .fnend
-
 .resolver_operacion:
  .fnstart
    push {lr}

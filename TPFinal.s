@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "                            "
+  input_usuario: .asciz "     "
   long_input= . - input_usuario
   mensaje_error: "Lo siento, mis respuestas son limitadas \n"
   long_error= . - mensaje_error
@@ -33,13 +33,16 @@
    ldr r3, =input_usuario
    ldr r9, =long_input
    ldr r9, [r9]
-   mov r8, #0 /*r8 = indice*/
+   mov r8, #1 /*r8 = indice*/
    mov r5, #0 /*r5 = va a almacenar el primer valor*/
    mov r6, #0 /*r6 = va a almacenar el segundo valor*/
    ldrb r4, [r3], #1 /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    cmp r4, #0x2D /*compara si es negativo*/
    beq negativo 
    bl ciclo_num
+   bl es_operacion /*tendria que comprobar si es una operacion valida*/
+   bl ciclo_num
+   bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
 .ciclo_num:
  .fnstart
@@ -51,6 +54,18 @@
    cmp r4, #0x20 /*compara r4 con espacio*/
    beq lr /*tendria que volver a es_cuenta*/
    b print_mensaje_error /*si no es un nro ni espacio, imprimo msj de error*/
+ .fnend
+.es_operacion:
+ .fnstart
+   cmp r4, #0x2A /*compara si es una multiplicacion (*) */
+   beq cargar_operacion
+   cmp r4, #0x2B /*compara si es una suma (+) */
+   beq cargar_operacion
+   cmp r4, #0x2D /*compara si es una resta (-) */
+   beq cargar_operacion
+   cmp r4, #0x2F /*compara si es una division (/)*/
+   beq cargar_operacion
+   bl imprimir_mensaje_error /*si no es ninguna de las op, devuelve error*/
  .fnend
 .resolver_operacion:
  .fnstart

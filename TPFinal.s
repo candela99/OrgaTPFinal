@@ -1,18 +1,26 @@
 .data
   input_usuario: .asciz "     "
   long_input= . - input_usuario
-  mensaje_error: "Lo siento, mis respuestas son limitadas \n"
+  mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error= . - mensaje_error
-  text_result: "##########"
+  text_result: .asciz "##########"
   operacion: .byte 0
   num1: .int 0
   num2: .int 0
   resultado: .int 0
   resto: .int 0
-  mensaje_despedida: "Adios! \n"
+  mensaje_despedida: .asciz "Adios! \n"
 
 .text
-.leer_input_usuario:
+print:
+ .fnstart
+    mov r7,#4
+    mov r0,#1
+    swi 0
+    bx lr
+ .fnend
+ 
+leer_input_usuario:
  .fnstart
    mov r7, #3 /*ingreso standard output*/
    mov r0, #0 /*le indico al SO que va a ser una cadena*/
@@ -22,13 +30,13 @@
    swi 0
    bx lr
  .fnend
-.es_numero:
+es_numero:
  .fnstart
    cmp r4, #0x39 /*compara r4 con 0x39, si es menor o igual, lo almacena, sino error*/ 
    ble almacenar_nro
    bl print_mensaje_error
  .fnend
-.es_cuenta:
+es_cuenta:
  .fnstart
    ldr r3, =input_usuario
    ldr r9, =long_input
@@ -44,7 +52,7 @@
    bl ciclo_num
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
-.ciclo_num:
+ciclo_num:
  .fnstart
    cmp r8, r9 /*r9 = long_input, compara el indice con la long */
    beq lr /*tendria que volver a es_cuenta*/
@@ -55,7 +63,7 @@
    beq lr /*tendria que volver a es_cuenta*/
    b print_mensaje_error /*si no es un nro ni espacio, imprimo msj de error*/
  .fnend
-.es_operacion:
+es_operacion:
  .fnstart
    cmp r4, #0x2A /*compara si es una multiplicacion (*) */
    beq cargar_operacion
@@ -67,7 +75,7 @@
    beq cargar_operacion
    bl imprimir_mensaje_error /*si no es ninguna de las op, devuelve error*/
  .fnend
-.resolver_operacion:
+resolver_operacion:
  .fnstart
    push {lr}
    ldrb r0,=operacion
@@ -76,6 +84,8 @@
    ldr  r1,[r1]   /*salta a la operacion a realizar si es igual o a error*/
    ldr  r2,=num2  /*r1 y r2 son los numeros*/
    ldr  r2,[r2]
+   ldr  r10,=resultado /*r10=direccion donde se va a guardar el resultado*/
+   mov  r9,#0     	   /*r9=resultado*/
    cmp r1,#0x2b
    beq suma
    cmp r1,#0x2d
@@ -84,30 +94,39 @@
    beq multiplicacion
    cmp r1,#0x2f
    beq division
-   bne mensaje_error
+   bne print_mensaje_error
    pop {lr}
  .fnend
-.suma:
-.resta:
-.multiplicacion:
-.division:
+suma:
+   add r9,r1,r2
+   str r9,[r10]
+   bx lr
+resta:
+   sub r9,r1,r2
+   str r9,[r10]
+   bx lr
+multiplicacion:
+   mul r9,r1,r2
+   str r9,[r10]
+   bx lr
+division:
 
 
 
-.print_mensaje_error:/*print mensaje de error*/
+print_mensaje_error:/*print mensaje de error*/
  .fnstart
    push {lr}
-   ldrb r1,=mensaje_error
-   ldr  r2,=long_error
-   mov r7,#4
-   mov r0,#1
-   swi 0
-   bx lr
+   ldr r1,=mensaje_error
+   ldr r2,=long_error
+   bl print
    pop {lr}
+   bx lr
  .fnend
+ 
+ 
 .global main
 main:
-	bl mensaje_error
+	bl print_mensaje_error
 fin:
    mov r7,#1
    swi 0

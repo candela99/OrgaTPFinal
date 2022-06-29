@@ -102,7 +102,7 @@ es_operacion:
    beq cargar_operacion
    cmp r4, #0x2F /*compara si es una division (/)*/
    beq cargar_operacion
-   bl imprimir_mensaje_error /*si no es ninguna de las op, devuelve error*/
+   bl print_mensaje_error /*si no es ninguna de las op, devuelve error*/
  .fnend
 cargar_operacion:
  .fnstart

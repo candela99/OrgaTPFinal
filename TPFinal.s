@@ -5,6 +5,8 @@
   long_error= . - mensaje_error
   text_result: .asciz "##########"
   operacion: .byte 0
+  vector_num1: .asciz "  "
+  vector_num2: .asciz "  "
   num1: .int 0
   num2: .int 0
   resultado: .int 0
@@ -36,6 +38,15 @@ es_numero:
    ble almacenar_nro
    bl print_mensaje_error
  .fnend
+almacenar_nro:
+ .fnstart
+   eor r7, r7
+   subs r7, r4, #30
+   strb r7, [r11] /*guarda el valor en el puntero a vector_numX*/
+   add r11, #+1 /*r11 = puntero de vector_numX, lo actualiza en la sig posicion*/
+   add r8, #1 /*incrementa el indice*/
+   bl ciclo_num
+ .fnend
 es_cuenta:
  .fnstart
    ldr r3, =input_usuario
@@ -45,23 +56,41 @@ es_cuenta:
    mov r5, #0 /*r5 = va a almacenar el primer valor*/
    mov r6, #0 /*r6 = va a almacenar el segundo valor*/
    ldrb r4, [r3], #1 /*r4 = almacena el valor del caracter, r3 = puntero a input*/
+   ldr r11, =vector_num1
    cmp r4, #0x2D /*compara si es negativo*/
    beq negativo 
    bl ciclo_num
    bl es_operacion /*tendria que comprobar si es una operacion valida*/
+   eor r11, r11
+   ldr r11, =vector_num2
+   beq negativo
    bl ciclo_num
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
+negativo: 
+ .fnstart
+   mov r1, #0x2D
+   strb r1, [r11] /*r11 = puntero a vector_num1*/
+   add r11, #+1
+   ldrb r4, [r3], #+1 /*mueve el puntero de input 1 posicion*/
+   add r8, #+1 /*incrementa el indice*/
+   bx lr
+ .fnend
 ciclo_num:
  .fnstart
    cmp r8, r9 /*r9 = long_input, compara el indice con la long */
-   beq lr /*tendria que volver a es_cuenta*/
-   add r8, #1 /*guardo en r8 el siguiente indice*/
+   bne es_espacio_o_num
+   bx lr /*tendria que volver a es_cuenta*/
+.fnend
+es_espacio_o_num:
+ .fnstart
    cmp r4, #0x30 /*compara r4 con 0x30*/
-   bhe es_numero
+   bge es_numero
    cmp r4, #0x20 /*compara r4 con espacio*/
-   beq lr /*tendria que volver a es_cuenta*/
-   b print_mensaje_error /*si no es un nro ni espacio, imprimo msj de error*/
+   bne print_mensaje_error /*si no es un nro ni espacio, imprimo msj de error*/
+   add r8, #1 /*guardo en r8 el siguiente indice*/
+   pop {lr}
+   bx lr /*tendria que volver a es_cuenta*/
  .fnend
 es_operacion:
  .fnstart
@@ -74,6 +103,13 @@ es_operacion:
    cmp r4, #0x2F /*compara si es una division (/)*/
    beq cargar_operacion
    bl imprimir_mensaje_error /*si no es ninguna de las op, devuelve error*/
+ .fnend
+cargar_operacion:
+ .fnstart
+  ldr r10, =operacion
+  strb r4, [r10]
+  pop {lr}
+  bx lr /*tendria que volver a es_cuenta*/
  .fnend
 resolver_operacion:
  .fnstart

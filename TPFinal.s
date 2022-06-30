@@ -168,8 +168,61 @@ print_mensaje_error:/*print mensaje de error*/
    pop {lr}
    bx lr
  .fnend
- 
- 
+
+/*metodo es_salir en proceso de contruccion*/
+es_salir:
+ .fnstart
+   push {lr}
+   ldr r1,=input_usuario
+   mov r3,#0 /*contador*/
+   ldr r4,[r1] /*primer letra del imput*/
+   bl compararA
+   pop {lr}
+   bx lr
+ .fnend
+
+compararA:
+   ldr r4,[r1]   /*si r4=a va a comparar si la proxima letra es d*/
+   cmp r4,#0x61
+   add r3,#1	/*incremento r3 para direc. relativo a registro*/
+   beq compararD /*con registro de desplazamiento*/
+   bx lr
+   
+compararD:
+   ldr r4,[r1,+r3]
+   cmp r4,#0x64
+   add r3,#1
+   beq compararI
+   bx lr /*si es distinto de adios sigue con el programa/
+
+compararI:
+   ldr r4,[r1,+r3]
+   cmp r4,#0x69
+   add r3,#1
+   beq compararO
+   bx lr
+
+compararO:
+   ldr r4,[r1,+r3]
+   cmp r4,#0x6f
+   add r3,#1
+   beq compararS
+   bx lr
+   
+compararS:
+   ldr r4,[r1,+r3]
+   cmp r4,#0x73
+   add r3,#1
+   beq comparar00
+   bx lr   
+
+comparar00:
+   ldr r4,[r1,+r3]
+   cmp r4,#0x00
+   add r3,#1
+   beq fin  /*el programa termina*/
+   bx lr
+   
 .global main
 main:
 	ldr r1,=saludoInicial

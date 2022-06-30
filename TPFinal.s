@@ -12,7 +12,8 @@
   resultado: .int 0
   resto: .int 0
   mensaje_despedida: .asciz "Adios! \n"
-
+  saludoInicial: .asciz "Hola, soy C-3PO relaciones cibernetico-humanas. En que puedo servile? \n"
+  longSaludo= . - saludoInicial
 .text
 print:
  .fnstart
@@ -128,7 +129,8 @@ resolver_operacion:
    beq resta
    cmp r1,#0x2a
    beq multiplicacion
-   cmp r1,#0x2f
+   cmp r1,#0x2f  /*r1/r2 r1=dividendo, r2=diviso*/
+   ldr r3,=resto /*r3=direccion en memoria del resto*/
    beq division
    bne print_mensaje_error
    pop {lr}
@@ -146,8 +148,16 @@ multiplicacion:
    str r9,[r10]
    bx lr
 division:
-
-
+   cmp r2,r1
+   bls div
+   bx lr
+div:
+   add r9,#1 /*cociente +1*/
+   sub r1,r2
+   cmp r2,r1
+   bls div    /*si el divisor<=dividendo sigo en el ciclo*/
+   str r9,[r10] /*cargo el resultado en memoria*/
+   bx lr
 
 print_mensaje_error:/*print mensaje de error*/
  .fnstart
@@ -162,6 +172,9 @@ print_mensaje_error:/*print mensaje de error*/
  
 .global main
 main:
+	ldr r1,=saludoInicial
+	ldr r2,=longSaludo
+	bl print
 	bl print_mensaje_error
 fin:
    mov r7,#1

@@ -193,6 +193,8 @@ compararD:
    cmp r4,#0x64
    add r3,#1
    beq compararI
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'a'
+   seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr /*si es distinto de adios sigue con el programa/
 
 compararI:
@@ -200,6 +202,8 @@ compararI:
    cmp r4,#0x69
    add r3,#1
    beq compararO
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'ad'
+   seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr
 
 compararO:
@@ -207,6 +211,8 @@ compararO:
    cmp r4,#0x6f
    add r3,#1
    beq compararS
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
+   seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr
    
 compararS:
@@ -214,6 +220,8 @@ compararS:
    cmp r4,#0x73
    add r3,#1
    beq comparar00
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
+   seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr   
 
 comparar00:
@@ -221,6 +229,8 @@ comparar00:
    cmp r4,#0x00
    add r3,#1
    beq fin  /*el programa termina*/
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adios'
+   seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr
    
 .global main

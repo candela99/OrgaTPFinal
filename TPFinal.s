@@ -12,6 +12,8 @@
   resultado: .int 0
   resto: .int 0
   mensaje_despedida: .asciz "Adios! \n"
+  long_despedida= . - mensaje_despedida
+  /*mensaje_test: .asciz "test! \n"*/
   saludoInicial: .asciz "Hola, soy C-3PO relaciones cibernetico-humanas. En que puedo servile? \n"
   longSaludo= . - saludoInicial
 .text
@@ -25,12 +27,14 @@ print:
  
 leer_input_usuario:
  .fnstart
+   push {lr}
    mov r7, #3 /*ingreso standard output*/
    mov r0, #0 /*le indico al SO que va a ser una cadena*/
+   ldr r2, =long_input  /*tamaño de la cadena a leer*/
    ldr r1, =input_usuario /*r1 = puntero de input*/
-   ldr r2, =long_input
-   ldr r2, [r2] /*r2 = cantidad de caracteres*/
+   /*ldr r2, [r2] /*r2 = cantidad de caracteres*/
    swi 0
+   pop {lr}
    bx lr
  .fnend
 es_numero:
@@ -173,32 +177,33 @@ print_mensaje_error:/*print mensaje de error*/
 es_salir:
  .fnstart
    push {lr}
+   eor r4,r4
    ldr r1,=input_usuario
    mov r3,#0 /*contador*/
-   ldr r4,[r1] /*primer letra del imput*/
+   /*primer letra del imput*/
    bl compararA
    pop {lr}
    bx lr
  .fnend
 
 compararA:
-   ldr r4,[r1]   /*si r4=a va a comparar si la proxima letra es d*/
+   ldrb r4,[r1,+r3]   /*si r4=a va a comparar si la proxima letra es d*/
    cmp r4,#0x61
    add r3,#1	/*incremento r3 para direc. relativo a registro*/
    beq compararD /*con registro de desplazamiento*/
    bx lr
    
 compararD:
-   ldr r4,[r1,+r3]
+   ldrb r4,[r1,+r3]
    cmp r4,#0x64
    add r3,#1
    beq compararI
-   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'a'
-   seguido de otra letra, salto a mostrar el mensaje de error*/
-   bx lr /*si es distinto de adios sigue con el programa/
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que */
+   /* sea 'a' seguido de otra letra, salto a mostrar el mensaje de error*/
+   bx lr /*si es distinto de adios sigue con el programa*/
 
 compararI:
-   ldr r4,[r1,+r3]
+   ldrb r4,[r1,+r3]
    cmp r4,#0x69
    add r3,#1
    beq compararO
@@ -207,7 +212,7 @@ compararI:
    bx lr
 
 compararO:
-   ldr r4,[r1,+r3]
+   ldrb r4,[r1,+r3]
    cmp r4,#0x6f
    add r3,#1
    beq compararS
@@ -216,7 +221,7 @@ compararO:
    bx lr
    
 compararS:
-   ldr r4,[r1,+r3]
+   ldrb r4,[r1,+r3]
    cmp r4,#0x73
    add r3,#1
    beq comparar00
@@ -225,20 +230,26 @@ compararS:
    bx lr   
 
 comparar00:
-   ldr r4,[r1,+r3]
+   ldrb r4,[r1,+r3]
    cmp r4,#0x00
    add r3,#1
-   beq fin  /*el programa termina*/
+   beq salir  /*el programa termina*/
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adios'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr
-   
+
+salir:
+   ldr r1,=mensaje_despedida
+   ldr r2,=long_despedida
+   bl print
+   b fin
+
 .global main
 main:
 	ldr r1,=saludoInicial
 	ldr r2,=longSaludo
 	bl print
-	bl print_mensaje_error
+	bl es_salir
 fin:
    mov r7,#1
    swi 0

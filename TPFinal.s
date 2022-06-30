@@ -27,14 +27,12 @@ print:
  
 leer_input_usuario:
  .fnstart
-   push {lr}
    mov r7, #3 /*ingreso standard output*/
    mov r0, #0 /*le indico al SO que va a ser una cadena*/
-   ldr r2, =long_input  /*tamaño de la cadena a leer*/
    ldr r1, =input_usuario /*r1 = puntero de input*/
-   /*ldr r2, [r2] /*r2 = cantidad de caracteres*/
+   ldr r2, =long_input  /*tamaño de la cadena a leer*/
+   ldr r2, [r2] /*r2 = cantidad de caracteres a ingresar*/
    swi 0
-   pop {lr}
    bx lr
  .fnend
 es_numero:
@@ -54,6 +52,7 @@ almacenar_nro:
  .fnend
 es_cuenta:
  .fnstart
+   push {lr} /*agrega a la pila el retorno al main*/
    ldr r3, =input_usuario
    ldr r9, =long_input
    ldr r9, [r9]
@@ -70,19 +69,22 @@ es_cuenta:
    ldr r11, =vector_num2
    beq negativo
    bl ciclo_num
+   pop {lr}
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
 negativo: 
  .fnstart
    mov r1, #0x2D
    strb r1, [r11] /*r11 = puntero a vector_num1*/
-   add r11, #+1
+   add r11, #+1 /*mueve el puntero de vector_num1 1 posicion*/
    ldrb r4, [r3], #+1 /*mueve el puntero de input 1 posicion*/
    add r8, #+1 /*incrementa el indice*/
    bx lr
  .fnend
 ciclo_num:
  .fnstart
+   push {lr} /*guarda en la pila el valor de retorno a es_cuenta*/
+   ldrb r4, [r3], #+1 /*mueve el puntero de input 1 posicion*/
    cmp r8, r9 /*r9 = long_input, compara el indice con la long */
    bne es_espacio_o_num
    bx lr /*tendria que volver a es_cuenta*/
@@ -99,6 +101,7 @@ es_espacio_o_num:
  .fnend
 es_operacion:
  .fnstart
+   push {lr} /*guarda la direccion de retorno a es_cuenta*/
    cmp r4, #0x2A /*compara si es una multiplicacion (*) */
    beq cargar_operacion
    cmp r4, #0x2B /*compara si es una suma (+) */
@@ -113,6 +116,7 @@ cargar_operacion:
  .fnstart
   ldr r10, =operacion
   strb r4, [r10]
+  ldrb r4, [r3], #+1 /*incrementa el puntero de input en una posicion*/
   pop {lr}
   bx lr /*tendria que volver a es_cuenta*/
  .fnend
@@ -248,6 +252,8 @@ salir:
 main:
 	ldr r1,=saludoInicial
 	ldr r2,=longSaludo
+        bl leer_input_usuario
+        bl es_cuenta
 	bl print
 	bl es_salir
 fin:

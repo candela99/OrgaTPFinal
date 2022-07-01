@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "      "
+  input_usuario: .asciz "       "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -52,29 +52,32 @@ es_cuenta:
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    ldr r11, =vector_num1
    ldr r12, =long_vector_num1
-   cmp r4, #0x2D /*compara si es negativo*/
-   beq negativo 
-   cmp r4, #0x30
-   bge es_numero
+   bl negativo 
+   bl numero
+   ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    bl es_operacion /*tendria que comprobar si es una operacion valida*/
    eor r5, r5
    eor r11, r11
    ldr r11, =vector_num2
    eor r12, r12
    ldr r12, =long_vector_num2
-   beq negativo
-   bl ciclo_num
+   bl negativo
+   bl numero
    pop {lr}
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
 negativo: 
  .fnstart
+   cmp r4, #0x2D
+   beq es_negativo
+   bx lr
+ es_negativo:
    eor r1, r1
    mov r1, #0x2D
    strb r1, [r11, r5] /*r11 = puntero a vector_num1*/
    add r5, #+1 /*mueve el puntero de vector_num1 1 posicion*/
    add r8, #+1 /*incrementa el indice*/
-   bx lr
+ bx lr
  .fnend
 ciclo_num:
  .fnstart
@@ -82,6 +85,7 @@ ciclo_num:
    beq volver_a_es_cuenta
    cmp r8, r9 /*r9 = long_input, compara el indice con la long */
    blt es_espacio_o_num
+   pop {lr}
    bx lr /*tendria que volver a es_cuenta*/
    volver_a_es_cuenta:
 	pop {lr}
@@ -96,27 +100,30 @@ es_espacio_o_num:
    cmp r4, #0x20 /*compara r4 con espacio*/
    bne salirEs_cueta /*si no es un nro ni espacio, imprimo msj de error*/
    add r8, #1 /*guardo en r8 el siguiente indice*/
-   bx lr /*tendria que volver a es_cuenta*/
+   pop {lr}
+   bx lr /*tendria que volver a ciclo_num*/
  .fnend
  
-es_numero:
+numero:
  .fnstart
    push {lr} /*guarda el retorno a es_cuenta*/
+ es_numero:  
    cmp r4, #0x39 /*compara r4 con 0x39, si es menor o igual, lo almacena, sino error*/ 
    ble almacenar_nro
-   bgt salirEs_cueta
-   bx lr
+   /*bgt salirEs_cueta*/
+  pop {lr}
+  bx lr
  .fnend
 salirEs_cueta:
 	.fnstart
-		bl es_salir
+                bl salir
 		pop {lr}
 		bx lr
 	.fnend
 almacenar_nro:
  .fnstart
    eor r6, r6
-   strb r4, [r6]
+   mov r6, r4
    subs r6, #0x30
    strb r6, [r11, r5] /*guarda el valor en el puntero a vector_numX*/
    add r5, #+1 /*r11 = puntero de vector_numX, lo actualiza en la sig posicion*/
@@ -127,7 +134,6 @@ almacenar_nro:
 es_operacion:
  .fnstart
    push {lr} /*guarda la direccion de retorno a es_cuenta*/
-   ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    cmp r4, #0x2A /*compara si es una multiplicacion (*) */
    beq cargar_operacion
    cmp r4, #0x2B /*compara si es una suma (+) */
@@ -144,6 +150,8 @@ cargar_operacion:
   strb r4, [r10]
   add r8, #+1
   ldrb r4, [r3, r8] /*incrementa el puntero de input en una posicion*/
+  cmp r4, #0x20
+  bne print_mensaje_error
   pop {lr}
   bx lr /*tendria que volver a es_cuenta*/
  .fnend
@@ -305,7 +313,7 @@ main:
 	/*ldr r2,=long_input
 	ldr r1,=input_usuario
 	bl print*/
-    	bl es_salir
+    	bl es_cuenta
 	/*ldr r1,=resultado
 	bl print
 	bl print

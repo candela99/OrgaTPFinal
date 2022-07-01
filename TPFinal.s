@@ -31,7 +31,6 @@ leer_input_usuario:
    mov r7, #3 /*ingreso standard output*/
    mov r0, #0 /*le indico al SO que va a ser una cadena*/
    ldr r2, =long_input  /*tamaño de la cadena a leer*/
-   /*ldr r2, [r2] /*r2 = cantidad de caracteres a ingresar*/
    ldr r1, =input_usuario /*r1 = puntero de input*/
    swi 0
    bx lr
@@ -49,7 +48,6 @@ almacenar_nro:
    strb r6, [r11, r5] /*guarda el valor en el puntero a vector_numX*/
    add r5, #+1 /*r11 = puntero de vector_numX, lo actualiza en la sig posicion*/
    add r8, #+1 /*incrementa el indice*/
-   /*ldrb r4, [r3, +r8]*/
    bl ciclo_num
  .fnend
 es_cuenta:
@@ -57,14 +55,12 @@ es_cuenta:
    push {lr} /*agrega a la pila el retorno al main*/
    ldr r3, =input_usuario
    ldr r9, =long_input
-   /*ldr r9, [r9]*/
    mov r8, #0 /*r8 = indice*/
    mov r5, #0 /*r5 = va a almacenar el primer valor*/
    mov r6, #0 /*r6 = va a almacenar el segundo valor*/
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    ldr r11, =vector_num1
    ldr r12, =long_vector_num1
-   /*ldr r12, [r12]*/
    cmp r4, #0x2D /*compara si es negativo*/
    beq negativo 
    bl ciclo_num
@@ -86,13 +82,11 @@ negativo:
    strb r1, [r11, r5] /*r11 = puntero a vector_num1*/
    add r5, #+1 /*mueve el puntero de vector_num1 1 posicion*/
    add r8, #+1 /*incrementa el indice*/
-   /*ldrb r4, [r3, r8] /*mueve el puntero */
    bx lr
  .fnend
 ciclo_num:
  .fnstart
    push {lr} /*guarda en la pila el valor de retorno a es_cuenta*/
-   /*ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    cmp r5, r12
    beq volver_a_es_cuenta
    cmp r8, r9 /*r9 = long_input, compara el indice con la long */
@@ -207,6 +201,7 @@ print_mensaje_error:/*print mensaje de error*/
    ldr r1,=mensaje_error
    ldr r2,=long_error
    bl print
+   b salir
    pop {lr}
    bx lr
  .fnend

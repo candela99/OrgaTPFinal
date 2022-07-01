@@ -201,7 +201,7 @@ print_mensaje_error:/*print mensaje de error*/
    ldr r1,=mensaje_error
    ldr r2,=long_error
    bl print
-   b salir
+   /*b salir coomentado*/
    pop {lr}
    bx lr
  .fnend
@@ -285,10 +285,13 @@ salir:
 
 .global main
 main:
-	/*ldr r1,=saludoInicial
-	ldr r2,=longSaludo*/
+	ldr r1,=saludoInicial
+	ldr r2,=longSaludo
+	bl print
         bl leer_input_usuario
         bl es_cuenta
+	ldr r1,=resultado
+	bl print
 	/*bl print
 	bl es_salir*/
 fin:

@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "      "
+  input_usuario: .asciz "       "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -35,21 +35,7 @@ leer_input_usuario:
    swi 0
    bx lr
  .fnend
-es_numero:
- .fnstart
-   cmp r4, #0x39 /*compara r4 con 0x39, si es menor o igual, lo almacena, sino error*/ 
-   ble almacenar_nro
-   bl print_mensaje_error
- .fnend
-almacenar_nro:
- .fnstart
-   eor r6, r6
-   subs r6, r4, #0x30
-   strb r6, [r11, r5] /*guarda el valor en el puntero a vector_numX*/
-   add r5, #+1 /*r11 = puntero de vector_numX, lo actualiza en la sig posicion*/
-   add r8, #+1 /*incrementa el indice*/
-   bl ciclo_num
- .fnend
+
 es_cuenta:
  .fnstart
    push {lr} /*agrega a la pila el retorno al main*/
@@ -86,30 +72,50 @@ negativo:
  .fnend
 ciclo_num:
  .fnstart
-   push {lr} /*guarda en la pila el valor de retorno a es_cuenta*/
-   cmp r5, r12
+   cmp r5, r12 /*comparo puntero de vector_num con su long*/
    beq volver_a_es_cuenta
    cmp r8, r9 /*r9 = long_input, compara el indice con la long */
    blt es_espacio_o_num
-   pop {lr}
    bx lr /*tendria que volver a es_cuenta*/
+   volver_a_es_cuenta:
+	pop {lr}
+	bx lr
 .fnend
-volver_a_es_cuenta:
- .fnstart
-  pop {lr}
-  bx lr
- .fnend
+ 
 es_espacio_o_num:
  .fnstart
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    cmp r4, #0x30 /*compara r4 con 0x30*/
    bge es_numero
    cmp r4, #0x20 /*compara r4 con espacio*/
-   bne print_mensaje_error /*si no es un nro ni espacio, imprimo msj de error*/
+   bne salirEs_cueta /*si no es un nro ni espacio, imprimo msj de error*/
    add r8, #1 /*guardo en r8 el siguiente indice*/
-   pop {lr}
    bx lr /*tendria que volver a es_cuenta*/
  .fnend
+ 
+es_numero:
+ .fnstart
+   cmp r4, #0x39 /*compara r4 con 0x39, si es menor o igual, lo almacena, sino error*/ 
+   ble almacenar_nro
+   bgt salirEs_cueta
+   bx lr
+ .fnend
+salirEs_cueta:
+	.fnstart
+		bl es_salir
+		pop {lr}
+		bx lr
+	.fnend
+almacenar_nro:
+ .fnstart
+   eor r6, r6
+   subs r6, r4, #0x30
+   strb r6, [r11, r5] /*guarda el valor en el puntero a vector_numX*/
+   add r5, #+1 /*r11 = puntero de vector_numX, lo actualiza en la sig posicion*/
+   add r8, #+1 /*incrementa el indice*/
+   bl ciclo_num
+ .fnend 
+ 
 es_operacion:
  .fnstart
    push {lr} /*guarda la direccion de retorno a es_cuenta*/
@@ -201,7 +207,6 @@ print_mensaje_error:/*print mensaje de error*/
    ldr r1,=mensaje_error
    ldr r2,=long_error
    bl print
-   /*b salir coomentado*/
    pop {lr}
    bx lr
  .fnend
@@ -210,70 +215,67 @@ print_mensaje_error:/*print mensaje de error*/
 es_salir:
  .fnstart
    push {lr}
-   eor r4,r4
+   eor r1,r1
    ldr r1,=input_usuario
    mov r3,#0 /*contador*/
    /*primer letra del imput*/
-   bl compararA
+   ldrb r4,[r1,+r3]   /*si r4=a va a comparar si la proxima letra es d*/
+   cmp r4,#0x61
+   beq compararD /*con registro de desplazamiento*/
+   bne print_mensaje_error
    pop {lr}
    bx lr
  .fnend
 
-compararA:
- .fnstart
-   ldrb r4,[r1,+r3]   /*si r4=a va a comparar si la proxima letra es d*/
-   add r3,#1	/*incremento r3 para direc. relativo a registro*/
-   cmp r4,#0x61
-   beq compararD /*con registro de desplazamiento*/
-   bx lr
- .fnend
 compararD:
  .fnstart
+   add r3,#1	/*incremento r3 para direc. relativo a registro*/
    ldrb r4,[r1,+r3]
-   add r3,#1
    cmp r4,#0x64
    beq compararI
-   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que */
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que */
    /* sea 'a' seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr /*si es distinto de adios sigue con el programa*/
  .fnend
 compararI:
  .fnstart
-   ldrb r4,[r1,+r3]
    add r3,#1
+   ldrb r4,[r1,+r3]
    cmp r4,#0x69
    beq compararO
-   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'ad'
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'ad'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr
  .fnend
 compararO:
  .fnstart
-   ldrb r4,[r1,+r3]
    add r3,#1
+   ldrb r4,[r1,+r3]
    cmp r4,#0x6f
    beq compararS
-   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr
  .fnend
 compararS:
  .fnstart
-   ldrb r4,[r1,+r3]
    add r3,#1
+   ldrb r4,[r1,+r3]
    cmp r4,#0x73
    beq comparar00
-   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
    seguido de otra letra, salto a mostrar el mensaje de error*/
-   bx lr   
+   bx lr
  .fnend
 comparar00:
  .fnstart
-   ldrb r4,[r1,+r3]
    add r3,#1
+   ldrb r4,[r1,+r3]
    cmp r4,#0x00
    beq salir  /*el programa termina*/
-   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adios'
+   cmp r4,#0x20
+   beq salir
+   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adios'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    bx lr
  .fnend
@@ -288,11 +290,14 @@ main:
 	ldr r1,=saludoInicial
 	ldr r2,=longSaludo
 	bl print
-        bl leer_input_usuario
-        bl es_cuenta
-	ldr r1,=resultado
+    	bl leer_input_usuario
+	/*ldr r2,=long_input
+	ldr r1,=input_usuario
+	bl print*/
+    	bl es_cuenta
+	/*ldr r1,=resultado
 	bl print
-	/*bl print
+	bl print
 	bl es_salir*/
 fin:
    mov r7,#1

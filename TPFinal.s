@@ -3,6 +3,8 @@
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
+  mensaje_resultado: .asciz "El resultado de la operacion es: \n"
+  long_msj_resultado = . - mensaje_resultado
   text_result: .asciz "##########"
   operacion: .byte 0
   vector_num1: .asciz "  "
@@ -219,6 +221,19 @@ div:
  .fnend
 
 imprimir_resultado:
+ .fnstart
+   push {lr}
+   ldr r2,=long_msj_resultado
+   ldr r1,=mensaje_resultado
+   bl print
+   eor r2,r2
+   eor r1,r1
+   ldr r1,=resultado
+   mov r2,#5
+   bl print
+   pop {lr}
+   bx lr
+ .fnend
 
 print_mensaje_error:/*print mensaje de error*/
  .fnstart
@@ -273,7 +288,7 @@ compararO:
    add r3,#1
    ldrb r4,[r5,+r3]
    cmp r4,#0x6f
-   beq salir
+   beq compararS
    cmp r4,#0x6f
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
    seguido de otra letra, salto a mostrar el mensaje de error*/
@@ -283,21 +298,9 @@ compararS:
    add r3,#1
    ldrb r4,[r5,+r3]
    cmp r4,#0x73
-   beq comparar00
+   beq salir
    cmp r4,#0x73
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
-   seguido de otra letra, salto a mostrar el mensaje de error*/
- .fnend
-comparar00:
- .fnstart
-   add r3,#1
-   ldrb r4,[r5,+r3]
-   cmp r4,#0x00
-   beq salir  /*el programa termina*/
-   cmp r4,#0x20
-   beq salir
-   cmp r4,#0x20
-   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adios'
    seguido de otra letra, salto a mostrar el mensaje de error*/
  .fnend
 salir:
@@ -315,24 +318,14 @@ main:
 	ldr r1,=saludoInicial
 	ldr r2,=longSaludo
 	bl print
-        /*
-	ldr r9, =long_input
-    	bl leer_input_usuario
-	ldr r2,=long_input
-	ldr r1,=input_usuario
-	bl print
-    	bl es_cuenta*/
-	/*ldr r1,=resultado
-	bl print
-	bl print
-	bl es_salir*/
 ciclo:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
 	bl leer_input_usuario
 	bl es_salir
 	/*bl es_cuenta
-	bl imprimir_resultado*/
+	bl imprimir_resultado*//*imprimir_resultado tiene que ser llamada 
+	en el calculo de las operaciones al finalizar la cuenta*/
 	bne ciclo
 fin:
    mov r7,#1

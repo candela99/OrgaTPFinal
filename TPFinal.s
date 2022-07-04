@@ -116,7 +116,7 @@ numero:
  .fnend
 salirEs_cueta:
 	.fnstart
-                bl salir
+                bl es_salir
 		pop {lr}
 		bx lr
 	.fnend
@@ -217,6 +217,9 @@ div:
    pop {lr}
    bx lr
  .fnend
+
+imprimir_resultado:
+
 print_mensaje_error:/*print mensaje de error*/
  .fnstart
    push {lr}
@@ -270,8 +273,8 @@ compararO:
    add r3,#1
    ldrb r4,[r5,+r3]
    cmp r4,#0x6f
-   beq compararS
-   cmp r4,#0x6f  
+   beq salir
+   cmp r4,#0x6f
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
    seguido de otra letra, salto a mostrar el mensaje de error*/
  .fnend
@@ -298,26 +301,39 @@ comparar00:
    seguido de otra letra, salto a mostrar el mensaje de error*/
  .fnend
 salir:
+ .fnstart
    ldr r1,=mensaje_despedida
    ldr r2,=long_despedida
    bl print
-   b fin
+   mov r11,#1
+   pop {lr}
+   bx lr
+ .fnend
 
 .global main
 main:
 	ldr r1,=saludoInicial
 	ldr r2,=longSaludo
 	bl print
-        ldr r9, =long_input
+        /*
+	ldr r9, =long_input
     	bl leer_input_usuario
-	/*ldr r2,=long_input
+	ldr r2,=long_input
 	ldr r1,=input_usuario
-	bl print*/
-    	bl es_cuenta
+	bl print
+    	bl es_cuenta*/
 	/*ldr r1,=resultado
 	bl print
 	bl print
 	bl es_salir*/
+ciclo:		/*ciclo main*/
+	cmp r11,#1  /*r11 se setea en 1 en salir*/
+	beq fin
+	bl leer_input_usuario
+	bl es_salir
+	/*bl es_cuenta
+	bl imprimir_resultado*/
+	bne ciclo
 fin:
    mov r7,#1
    swi 0

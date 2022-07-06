@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "       "
+  input_usuario: .asciz "             "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -258,12 +258,8 @@ es_salir:
    beq compararD /*con registro de desplazamiento*/
    cmp r4,#0x61
    bne print_mensaje_error
-   pop {lr}
-   bx lr
- .fnend
-
-compararD:
- .fnstart
+   b exit
+ compararD:
    add r3,#1	/*incremento r3 para direc. relativo a registro*/
    ldrb r4,[r5,+r3]
    cmp r4,#0x64
@@ -271,10 +267,8 @@ compararD:
    cmp r4,#0x64
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que */
    /* sea 'a' seguido de otra letra, salto a mostrar el mensaje de error*/
-   /*bx lr /*si es distinto de adios sigue con el programa*/
- .fnend
-compararI:
- .fnstart
+   b exit /*si es distinto de adios sigue con el programa*/
+ compararI:
    add r3,#1
    ldrb r4,[r5,+r3]
    cmp r4,#0x69
@@ -282,9 +276,8 @@ compararI:
    cmp r4,#0x69
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'ad'
    seguido de otra letra, salto a mostrar el mensaje de error*/
- .fnend
-compararO:
- .fnstart
+   b exit
+ compararO:
    add r3,#1
    ldrb r4,[r5,+r3]
    cmp r4,#0x6f
@@ -292,9 +285,8 @@ compararO:
    cmp r4,#0x6f
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
    seguido de otra letra, salto a mostrar el mensaje de error*/
- .fnend
-compararS:
- .fnstart
+   b exit
+ compararS:
    add r3,#1
    ldrb r4,[r5,+r3]
    cmp r4,#0x73
@@ -302,6 +294,10 @@ compararS:
    cmp r4,#0x73
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
    seguido de otra letra, salto a mostrar el mensaje de error*/
+   b exit
+ exit:
+   pop {lr}
+   bx lr
  .fnend
 salir:
  .fnstart
@@ -322,7 +318,7 @@ ciclo:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
 	bl leer_input_usuario
-	bl es_cuenta /*si es es_salir el mensaje de error manda a pedir al
+	bl es_salir /*si es es_salir el mensaje de error manda a pedir al
 	usuario que escriba otra cosa*/
 	/*bl es_cuenta
 	bl imprimir_resultado*//*imprimir_resultado tiene que ser llamada 

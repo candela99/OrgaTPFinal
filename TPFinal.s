@@ -251,12 +251,12 @@ es_salir:
    push {lr}
    eor r5,r5
    ldr r5,=input_usuario
+   ldr r6,=long_input
    mov r3,#0 /*contador*/
    /*primer letra del imput*/
    ldrb r4,[r5,+r3]   /*si r4=a va a comparar si la proxima letra es d*/
    cmp r4,#0x61
    beq compararD /*con registro de desplazamiento*/
-   cmp r4,#0x61
    bne print_mensaje_error
    b exit
  compararD:
@@ -264,7 +264,6 @@ es_salir:
    ldrb r4,[r5,+r3]
    cmp r4,#0x64
    beq compararI
-   cmp r4,#0x64
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que */
    /* sea 'a' seguido de otra letra, salto a mostrar el mensaje de error*/
    b exit /*si es distinto de adios sigue con el programa*/
@@ -273,7 +272,6 @@ es_salir:
    ldrb r4,[r5,+r3]
    cmp r4,#0x69
    beq compararO
-   cmp r4,#0x69
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'ad'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    b exit
@@ -282,7 +280,6 @@ es_salir:
    ldrb r4,[r5,+r3]
    cmp r4,#0x6f
    beq compararS
-   cmp r4,#0x6f
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    b exit
@@ -290,24 +287,28 @@ es_salir:
    add r3,#1
    ldrb r4,[r5,+r3]
    cmp r4,#0x73
-   beq salir
-   cmp r4,#0x73
+   beq compararEnter
    bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
    seguido de otra letra, salto a mostrar el mensaje de error*/
+   b exit
+ compararEnter:
+   add r3,#1
+   ldrb r4,[r5,+r3]
+   cmp r4,#0x0a /*LF*/
+   beq salir
+   bne print_mensaje_error
+   b exit
+ salir:
+   ldr r1,=mensaje_despedida
+   ldr r2,=long_despedida
+   bl print
+   mov r11,#1/*registro para salir del ciclo main*/
    b exit
  exit:
    pop {lr}
    bx lr
  .fnend
-salir:
- .fnstart
-   ldr r1,=mensaje_despedida
-   ldr r2,=long_despedida
-   bl print
-   mov r11,#1
-   pop {lr}
-   bx lr
- .fnend
+
 
 .global main
 main:
@@ -318,7 +319,7 @@ ciclo:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
 	bl leer_input_usuario
-	bl es_salir /*si es es_salir el mensaje de error manda a pedir al
+	bl es_cuenta /*si es es_salir el mensaje de error manda a pedir al
 	usuario que escriba otra cosa*/
 	/*bl es_cuenta
 	bl imprimir_resultado*//*imprimir_resultado tiene que ser llamada 

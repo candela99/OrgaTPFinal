@@ -18,7 +18,7 @@
   mensaje_despedida: .asciz "Adios! \n"
   long_despedida = . - mensaje_despedida
   /*mensaje_test: .asciz "test! \n"*/
-  saludoInicial: .asciz "Hola, soy C-3PO relaciones cibernetico-humanas. En que puedo servile? \n"
+  saludoInicial: .asciz "Hola, en que puedo ayudarte? Puedo realizar las siguientes operaciones aritmeticas: '+ - * /' \n"
   longSaludo = . - saludoInicial
 .text
 print:
@@ -322,7 +322,8 @@ ciclo:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
 	bl leer_input_usuario
-	bl es_salir
+	bl es_cuenta /*si es es_salir el mensaje de error manda a pedir al
+	usuario que escriba otra cosa*/
 	/*bl es_cuenta
 	bl imprimir_resultado*//*imprimir_resultado tiene que ser llamada 
 	en el calculo de las operaciones al finalizar la cuenta*/

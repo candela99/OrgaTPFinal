@@ -12,7 +12,9 @@
   vector_num2: .asciz "     "
   long_vector_num2 = . - vector_num2
   num1: .int 0
+  cant_numeros_num1: .int 0
   num2: .int 0
+  cant_numeros_num2: .int 0
   resultado: .int 0
   resto: .int 0
   mensaje_despedida: .asciz "Adios! \n"
@@ -49,13 +51,16 @@ es_cuenta:
    ldr r3, =input_usuario
    ldr r9, =long_input
    mov r8, #0 /*r8 = indice*/
-   mov r5, #0 /*r5 = va a almacenar el primer valor*/
-   mov r6, #0 /*r6 = va a almacenar el segundo valor*/
+   mov r5, #0 /*r5 = indice de vector_numX*/
+   mov r6, #0 /*r6 = va a almacenar la cantidad de numeros ingresados en vector_numX*/
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    ldr r11, =vector_num1
    ldr r12, =long_vector_num1
    bl negativo 
    bl numero
+   ldr r6, =cant_numeros_num1
+   sub r5, #1
+   str r5, [r6] /*carga en r6 la cantidad de nros de vector_num1*/
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    bl es_operacion /*tendria que comprobar si es una operacion valida*/
    eor r5, r5
@@ -65,6 +70,10 @@ es_cuenta:
    ldr r12, =long_vector_num2
    bl negativo
    bl numero
+   ldr r6, =cant_numeros_num2
+   sub r5, #1
+   str r5, [r6]
+   bl reconocer_input
    pop {lr}
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
@@ -160,6 +169,33 @@ cargar_operacion:
   pop {lr}
   bx lr /*tendria que volver a es_cuenta*/
  .fnend
+reconocer_input1:
+ .fnstart
+  ldr r6, =cant_numeros_num1
+  ldr r6, [r6] /*r6 = cant numeros de num1*/
+  mov r5, r6 /*puntero*/
+  sub r5, #1
+  ldr r3, =vector_num1
+  ldrb r4, [r3, +r5]
+  cmp r4, #0x2D
+  bl ciclo_numero
+ .fnend
+ciclo_numero:
+ .fnstart
+  push {lr}
+  mov r4, r5
+  mov r8, #10
+  ciclo:   
+   bl ciclo_potencia
+   sub r4, #1
+   cmp r4, #0
+   ble ciclo
+ .fnend
+ciclo_potencia:
+   .fstart
+    mul r8, r8, #10
+    bx lr
+   .fnend
 resolver_operacion:
  .fnstart
    push {lr}

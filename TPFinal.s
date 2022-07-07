@@ -7,9 +7,9 @@
   long_msj_resultado = . - mensaje_resultado
   text_result: .asciz "##########"
   operacion: .byte 0
-  vector_num1: .asciz "  "
+  vector_num1: .asciz "     "
   long_vector_num1 = . - vector_num1
-  vector_num2: .asciz "  "
+  vector_num2: .asciz "     "
   long_vector_num2 = . - vector_num2
   num1: .int 0
   num2: .int 0
@@ -100,10 +100,13 @@ es_espacio_o_num:
    cmp r4, #0x30 /*compara r4 con 0x30*/
    bge es_numero
    cmp r4, #0x20 /*compara r4 con espacio*/
-   bne salirEs_cueta /*si no es un nro ni espacio, imprimo msj de error*/
+   beq ir_a_es_cuenta
+   cmp r4, #0x0A
+   bne salirEs_cueta
+ ir_a_es_cuenta:
    add r8, #1 /*guardo en r8 el siguiente indice*/
    pop {lr}
-   bx lr /*tendria que volver a ciclo_num*/
+   bx lr /*tendria que volver a es_cuenta*/
  .fnend
  
 numero:

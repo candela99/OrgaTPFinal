@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "3 + 4             "
+  input_usuario: .asciz "-3 + 4             "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -12,8 +12,10 @@
   vector_num2: .asciz "     "
   long_vector_num2 = . - vector_num2
   num1: .int 0
+  signo_num1: .int 0 /*si es 1 es negativo*/
   cant_numeros_num1: .int 0
   num2: .int 0
+  signo_num2: .int 0 /*si es 1 es negativo*/
   cant_numeros_num2: .int 0
   resultado: .int 0
   resto: .int 0
@@ -56,6 +58,7 @@ es_cuenta:
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    ldr r11, =vector_num1
    ldr r12, =long_vector_num1
+   ldr r10, =signo_num1
    bl negativo 
    bl numero
    ldr r6, =cant_numeros_num1
@@ -68,17 +71,20 @@ es_cuenta:
    eor r12, r12
    ldr r12, =long_vector_num2
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
+   ldr r10, =signo_num2
    bl negativo
    bl numero
    ldr r6, =cant_numeros_num2
    str r10, [r6]
    ldr r3, =vector_num1
    ldr r6, =cant_numeros_num1
+   ldr r1, =signo_num1
    bl reconocer_input
    ldr r4, =num1
    str r2, [r4]
    ldr r3, =vector_num2
    ldr r6, =cant_numeros_num2
+   ldr r1, =signo_num2
    bl reconocer_input
    ldr r4, =num2
    str r2, [r4]
@@ -94,9 +100,12 @@ negativo:
  es_negativo:
    eor r1, r1
    mov r1, #0x2D
+   mov r2, #1
+   strb r2, [r10]
    strb r1, [r11, r5] /*r11 = puntero a vector_num1*/
    add r5, #+1 /*mueve el puntero de vector_num1 1 posicion*/
    add r8, #+1 /*incrementa el indice*/
+   ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
  bx lr
  .fnend
 ciclo_num:
@@ -191,9 +200,34 @@ reconocer_input:
   mov r10, r6
   mov r5, #0 /*puntero*/
   mov r12, #0 /*r12 = acumulador*/
+  ldr r1,[r1]
+  bl mover_posicion_si_neg
   bl ciclo_numero
+  bl ver_si_negativo
   pop {lr}
   bx lr
+ .fnend
+mover_posicion_si_neg:
+ .fnstart
+   cmp r1, #1
+   beq mover
+   bx lr
+ mover:
+   add r5, #1
+   bx lr
+ .fnend
+ver_si_negativo:
+ .fnstart
+  cmp r1, #1
+  beq hacer_negativo
+ bx lr
+ hacer_negativo:
+  mov r3, #0xffffffff
+  eor r2, r3
+  add r2, #1
+  /*muls r11, r2, r1
+  mov r2, r11*/
+ bx lr
  .fnend
 ciclo_numero: /*recorre nro x nro, (recorre el vector)*/
  .fnstart
@@ -274,7 +308,7 @@ resolver_operacion:
  .fnend
 suma:
  .fnstart
-   add r9,r1,r2
+   adds r9,r1,r2
    strb r9,[r10]
    pop {lr}
    bx lr

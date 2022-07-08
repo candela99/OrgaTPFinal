@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "33 + 40             "
+  input_usuario: .asciz "333 + 404             "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -76,12 +76,12 @@ es_cuenta:
    ldr r6, =cant_numeros_num1
    bl reconocer_input
    ldr r4, =num1
-   str r8, [r4]
+   str r2, [r4]
    ldr r3, =vector_num2
    ldr r6, =cant_numeros_num2
    bl reconocer_input
    ldr r4, =num2
-   str r8, [r4]
+   str r2, [r4]
    pop {lr}
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
@@ -198,12 +198,14 @@ ciclo_numero: /*recorre nro x nro, (recorre el vector)*/
  .fnstart
   push {lr} /*guarda el retorno a reconocer_input*/
   mov r8, #10
+  mov r2, #0 /*r2 = acumulador*/
  ciclo_n: 
    ldrb r4, [r3, +r5]
    mov r9, r6 /* r9 = aux, para calc potencias de 10*/
    mov r11, #10
    bl calc_potencia
    mul r8, r4, r11
+   add r2, r8
    add r5, #1 /*incrementa el puntero*/
    sub r6, #1 /*baja una potencia*/
    cmp r5, r10
@@ -226,7 +228,7 @@ ciclo_numero: /*recorre nro x nro, (recorre el vector)*/
  .fnend
 potencia_0:
  .fnstart
-  add r8, r4
+  add r2, r4
   pop {lr}
   pop {lr}
   bx lr
@@ -234,7 +236,6 @@ potencia_0:
 calc_potencia:
    .fnstart
     push {lr} /*pushea el retorno a ciclo_n*/
- ciclo_digito:
     cmp r9, #2
     beq potencia_1
     cmp r9, #1
@@ -242,7 +243,8 @@ calc_potencia:
     mul r12, r11, r8
     mov r11, r12
     sub r9, #1
-    b ciclo_digito
+    pop {lr}
+    bx lr
    .fnend
 resolver_operacion:
  .fnstart

@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "333 + 404             "
+  input_usuario: .asciz "3 + 4             "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -82,6 +82,7 @@ es_cuenta:
    bl reconocer_input
    ldr r4, =num2
    str r2, [r4]
+   bl resolver_operacion
    pop {lr}
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
@@ -405,6 +406,10 @@ main:
 	ldr r2,=longSaludo
 	bl print*/
         bl es_cuenta
+        ldr r1, =num1
+        ldr r1, [r1]
+        ldr r2, =num2
+        ldr r2, [r2]
 
 /*ciclo_main:		/*ciclo main*/
 	/*cmp r11,#1  /*r11 se setea en 1 en salir

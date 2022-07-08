@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "             "
+  input_usuario: .asciz "33 + 40             "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -59,8 +59,7 @@ es_cuenta:
    bl negativo 
    bl numero
    ldr r6, =cant_numeros_num1
-   sub r5, #1
-   str r5, [r6] /*carga en r6 la cantidad de nros de vector_num1*/
+   str r10, [r6]
    ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    bl es_operacion /*tendria que comprobar si es una operacion valida*/
    eor r5, r5
@@ -68,12 +67,21 @@ es_cuenta:
    ldr r11, =vector_num2
    eor r12, r12
    ldr r12, =long_vector_num2
+   ldrb r4, [r3, +r8] /*r4 = almacena el valor del caracter, r3 = puntero a input*/
    bl negativo
    bl numero
    ldr r6, =cant_numeros_num2
-   sub r5, #1
-   str r5, [r6]
+   str r10, [r6]
+   ldr r3, =vector_num1
+   ldr r6, =cant_numeros_num1
    bl reconocer_input
+   ldr r4, =num1
+   str r8, [r4]
+   ldr r3, =vector_num2
+   ldr r6, =cant_numeros_num2
+   bl reconocer_input
+   ldr r4, =num2
+   str r8, [r4]
    pop {lr}
    bx lr /*vuelve a quien lo llamo, seria el main*/
  .fnend 
@@ -121,6 +129,10 @@ es_espacio_o_num:
 numero:
  .fnstart
    push {lr} /*guarda el retorno a es_cuenta*/
+   mov r10, #0
+   cmp r4, #0x30
+   bge es_numero
+   bl salirEs_cueta
  es_numero:  
    cmp r4, #0x39 /*compara r4 con 0x39, si es menor o igual, lo almacena, sino error*/ 
    ble almacenar_nro
@@ -142,6 +154,7 @@ almacenar_nro:
    strb r6, [r11, r5] /*guarda el valor en el puntero a vector_numX*/
    add r5, #+1 /*r11 = puntero de vector_numX, lo actualiza en la sig posicion*/
    add r8, #+1 /*incrementa el indice*/
+   add r10, #1
    bl ciclo_num
  .fnend 
  
@@ -166,35 +179,70 @@ cargar_operacion:
   ldrb r4, [r3, r8] /*incrementa el puntero de input en una posicion*/
   cmp r4, #0x20
   bne print_mensaje_error
+  add r8, #1
   pop {lr}
   bx lr /*tendria que volver a es_cuenta*/
  .fnend
-reconocer_input1:
- .fnstart
-  ldr r6, =cant_numeros_num1
-  ldr r6, [r6] /*r6 = cant numeros de num1*/
-  mov r5, r6 /*puntero*/
-  sub r5, #1
-  ldr r3, =vector_num1
-  ldrb r4, [r3, +r5]
-  cmp r4, #0x2D
-  bl ciclo_numero
- .fnend
-ciclo_numero:
+reconocer_input:
  .fnstart
   push {lr}
-  mov r4, r5
-  mov r8, #10
-  ciclo:   
-   bl ciclo_potencia
-   sub r4, #1
-   cmp r4, #0
-   ble ciclo
+  ldr r6, [r6] /*r6 = cant numeros de numX*/
+  mov r10, r6
+  mov r5, #0 /*puntero*/
+  mov r12, #0 /*r12 = acumulador*/
+  bl ciclo_numero
+  pop {lr}
+  bx lr
  .fnend
-ciclo_potencia:
-   .fstart
-    mul r8, r8, #10
-    bx lr
+ciclo_numero: /*recorre nro x nro, (recorre el vector)*/
+ .fnstart
+  push {lr} /*guarda el retorno a reconocer_input*/
+  mov r8, #10
+ ciclo_n: 
+   ldrb r4, [r3, +r5]
+   mov r9, r6 /* r9 = aux, para calc potencias de 10*/
+   mov r11, #10
+   bl calc_potencia
+   mul r8, r4, r11
+   add r5, #1 /*incrementa el puntero*/
+   sub r6, #1 /*baja una potencia*/
+   cmp r5, r10
+   ble ciclo_n
+  b salir_a_ri
+ .fnend
+ potencia_1:
+ .fnstart
+  mov r1, #1
+  mul r12, r11, r1
+  mov r11, r12
+  sub r9, #1
+  pop {lr} 
+  bx lr
+ .fnend
+ salir_a_ri:
+ .fnstart
+  pop {lr}
+  bx lr
+ .fnend
+potencia_0:
+ .fnstart
+  add r8, r4
+  pop {lr}
+  pop {lr}
+  bx lr
+ .fnend
+calc_potencia:
+   .fnstart
+    push {lr} /*pushea el retorno a ciclo_n*/
+ ciclo_digito:
+    cmp r9, #2
+    beq potencia_1
+    cmp r9, #1
+    beq potencia_0
+    mul r12, r11, r8
+    mov r11, r12
+    sub r9, #1
+    b ciclo_digito
    .fnend
 resolver_operacion:
  .fnstart
@@ -351,19 +399,21 @@ es_salir:
 
 .global main
 main:
-	ldr r1,=saludoInicial
+	/*ldr r1,=saludoInicial
 	ldr r2,=longSaludo
-	bl print
-ciclo:		/*ciclo main*/
-	cmp r11,#1  /*r11 se setea en 1 en salir*/
+	bl print*/
+        bl es_cuenta
+
+/*ciclo_main:		/*ciclo main*/
+	/*cmp r11,#1  /*r11 se setea en 1 en salir
 	beq fin
 	bl leer_input_usuario
-	bl es_cuenta /*si es es_salir el mensaje de error manda a pedir al
+	bl es_cuenta*/ /*si es es_salir el mensaje de error manda a pedir al
 	usuario que escriba otra cosa*/
 	/*bl es_cuenta
 	bl imprimir_resultado*//*imprimir_resultado tiene que ser llamada 
-	en el calculo de las operaciones al finalizar la cuenta*/
-	bne ciclo
+	en el calculo de las operaciones al finalizar la cuenta
+	bne ciclo_main*/
 fin:
    mov r7,#1
    swi 0

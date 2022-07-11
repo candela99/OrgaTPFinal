@@ -299,48 +299,50 @@ resolver_operacion:
    ldr  r2,[r2]
    ldr  r10,=resultado /*r10=direccion donde se va a guardar el resultado*/
    mov  r9,#0     	   /*r9=resultado*/
-   cmp r0,#0x2b
-   beq suma
-   cmp r0,#0x2d
-   beq resta
-   cmp r0,#0x2a
-   beq multiplicacion
+   bl suma
+   bl resta
+   bl multiplicacion
    ldr r3,=resto /*r3=direccion en memoria del resto*/
-   cmp r0,#0x2f  /*r1/r2 r1=dividendo, r2=diviso*/
-   beq division
+   bl division
    pop {lr}
    bx lr
  .fnend
 suma:
  .fnstart
-   push {lr}
+   cmp r0,#0x2b
+   beq sumar
+   bx lr
+ sumar:
    adds r9,r1,r2
    strb r9,[r10]
-   pop {lr}
    bx lr
  .fnend
 resta:
  .fnstart
-   push {lr}
+   cmp r0,#0x2d
+   beq restar
+   bx lr
+ restar:
    sub r9,r1,r2
    strb r9,[r10]
-   pop {lr}
    bx lr
  .fnend
 multiplicacion:
  .fnstart
-   push {lr}
+   cmp r0,#0x2a
+   beq multiplicar
+   bx lr
+ multiplicar:
    mul r9,r1,r2
    strb r9,[r10]
-   pop {lr}
    bx lr
  .fnend
-deshacer_negativo:
+complemento_a2:
  .fnstart
   cmp r3, #1
-  beq deshacer
+  beq ca2
   bx lr
-  deshacer:
+  ca2:
    mov r5, #0xffffffff
    eor r4, r5
    add r4, #1
@@ -349,33 +351,49 @@ deshacer_negativo:
 division:
  .fnstart
    push {lr}
+   cmp r0,#0x2f  /*r1/r2 r1=dividendo, r2=diviso*/
+   beq dividir
+   bx lr
+ dividir:
    ldr r3, =signo_num1
    ldr r3, [r3]
    ldr r4, =num1
    ldr r4, [r4]
-   bl deshacer_negativo
+   bl complemento_a2
    mov r1, r4
    ldr r3, =signo_num2
    ldr r3, [r3]
    ldr r4, =num2
    ldr r4, [r4]
-   bl deshacer_negativo
+   bl complemento_a2
    mov r2, r4
-   cmp r1, r2
    bl div
+   ldr r1, =signo_num1
+   ldr r1, [r1]
+   ldr r2, =signo_num2
+   ldr r2, [r2]
+   eor r3, r1, r2
+   bl resultado_negativo
    str r9,[r10] /*cargo el resultado en memoria*/
    pop {lr}
    bx lr
  .fnend
-div:
+resultado_negativo:
  .fnstart
   push {lr}
+  mov r4, r9
+  bl complemento_a2
+  mov r9, r4
+  pop {lr}
+  bx lr
+ .fnend
+div:
+ .fnstart
   ciclo:
    add r9,#1 /*cociente +1*/
    sub r1,r2
    cmp r1,r2
    bge ciclo    /*si el divisor<=dividendo sigo en el ciclo*/
-  pop {lr}
   bx lr
  .fnend
 

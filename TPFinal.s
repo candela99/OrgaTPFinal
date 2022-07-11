@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "              "
+  input_usuario: .asciz "-3 / 1              "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -308,10 +308,12 @@ resolver_operacion:
    ldr r3,=resto /*r3=direccion en memoria del resto*/
    cmp r0,#0x2f  /*r1/r2 r1=dividendo, r2=diviso*/
    beq division
+   pop {lr}
    bx lr
  .fnend
 suma:
  .fnstart
+   push {lr}
    adds r9,r1,r2
    strb r9,[r10]
    pop {lr}
@@ -319,6 +321,7 @@ suma:
  .fnend
 resta:
  .fnstart
+   push {lr}
    sub r9,r1,r2
    strb r9,[r10]
    pop {lr}
@@ -326,26 +329,54 @@ resta:
  .fnend
 multiplicacion:
  .fnstart
+   push {lr}
    mul r9,r1,r2
    strb r9,[r10]
    pop {lr}
    bx lr
  .fnend
+deshacer_negativo:
+ .fnstart
+  cmp r3, #1
+  beq deshacer
+  bx lr
+  deshacer:
+   mov r5, #0xffffffff
+   eor r4, r5
+   add r4, #1
+   bx lr
+ .fnend
 division:
  .fnstart
-   cmp r2,r1
-   bls div
+   push {lr}
+   ldr r3, =signo_num1
+   ldr r3, [r3]
+   ldr r4, =num1
+   ldr r4, [r4]
+   bl deshacer_negativo
+   mov r1, r4
+   ldr r3, =signo_num2
+   ldr r3, [r3]
+   ldr r4, =num2
+   ldr r4, [r4]
+   bl deshacer_negativo
+   mov r2, r4
+   cmp r1, r2
+   bl div
+   str r9,[r10] /*cargo el resultado en memoria*/
+   pop {lr}
    bx lr
  .fnend
 div:
  .fnstart
+  push {lr}
+  ciclo:
    add r9,#1 /*cociente +1*/
    sub r1,r2
-   cmp r2,r1
-   bls div    /*si el divisor<=dividendo sigo en el ciclo*/
-   strb r9,[r10] /*cargo el resultado en memoria*/
-   pop {lr}
-   bx lr
+   cmp r1,r2
+   bge ciclo    /*si el divisor<=dividendo sigo en el ciclo*/
+  pop {lr}
+  bx lr
  .fnend
 
 imprimir_resultado:
@@ -487,10 +518,10 @@ main:
 
 ciclo_main:		/*ciclo main*/
 	/*cmp r11,#1  /*r11 se setea en 1 en salir*/
-	/*beq fin
-	bl leer_input_usuario
+	/*beq fin*/
+	/*bl leer_input_usuario*/
 	bl es_cuenta /*procesa el input del usuario*/
-	bl imprimir_resultado /*imprimir_resultado tiene que ser llamada 
+	/*bl imprimir_resultado /*imprimir_resultado tiene que ser llamada 
 	en el calculo de las operaciones al finalizar la cuenta*/
 	/*bne ciclo_main*/
 fin:

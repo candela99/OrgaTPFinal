@@ -1,9 +1,9 @@
 .data
-  input_usuario: .asciz "-3 + 4             "
+  input_usuario: .asciz "           "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
-  mensaje_resultado: .asciz "El resultado de la operacion es: \n"
+  mensaje_resultado: .asciz "El resultado de la operacion es: "
   long_msj_resultado = . - mensaje_resultado
   text_result: .asciz "##########"
   operacion: .byte 0
@@ -19,9 +19,12 @@
   cant_numeros_num2: .int 0
   resultado: .int 0
   resto: .int 0
+  resultadoString: .asciz "             "
+  long_resultadoString = . -resultadoString
   mensaje_despedida: .asciz "Adios! \n"
   long_despedida = . - mensaje_despedida
-  /*mensaje_test: .asciz "test! \n"*/
+  enter: .asciz "\n"
+  long_enter = . - enter
   saludoInicial: .asciz "Hola, en que puedo ayudarte? Puedo realizar las siguientes operaciones aritmeticas: '+ - * /' \n"
   longSaludo = . - saludoInicial
 .text
@@ -154,6 +157,7 @@ salirEs_cueta:
 	.fnstart
                 bl es_salir
 		pop {lr}
+		pop {lr}
 		bx lr
 	.fnend
 almacenar_nro:
@@ -179,7 +183,7 @@ es_operacion:
    beq cargar_operacion
    cmp r4, #0x2F /*compara si es una division (/)*/
    beq cargar_operacion
-   bl print_mensaje_error /*si no es ninguna de las op, devuelve error*/
+   bl salirEs_cueta /*si no es ninguna de las op, devuelve error*/
  .fnend
 cargar_operacion:
  .fnstart
@@ -188,7 +192,7 @@ cargar_operacion:
   add r8, #+1
   ldrb r4, [r3, r8] /*incrementa el puntero de input en una posicion*/
   cmp r4, #0x20
-  bne print_mensaje_error
+  bne salirEs_cueta
   add r8, #1
   pop {lr}
   bx lr /*tendria que volver a es_cuenta*/
@@ -350,14 +354,30 @@ imprimir_resultado:
    ldr r2,=long_msj_resultado
    ldr r1,=mensaje_resultado
    bl print
+   /*bl resultado_toString*/
    eor r2,r2
    eor r1,r1
    ldr r1,=resultado
-   mov r2,#5
+   mov r7,#4
+   mov r0,#2
+   swi 0
+   eor r2,r2
+   eor r1,r1
+   ldr r1, =enter
+   ldr r2,=long_enter
    bl print
    pop {lr}
    bx lr
  .fnend
+
+/*resultado_toString:
+ .fnstart
+   push {lr}
+   ldr r3,=resultado
+   pop {lr}
+   bx lr
+ .fnend
+*/
 
 print_mensaje_error:/*print mensaje de error*/
  .fnstart
@@ -374,6 +394,7 @@ es_salir:
  .fnstart
    push {lr}
    eor r5,r5
+   eor r11,r11
    ldr r5,=input_usuario
    ldr r6,=long_input
    mov r3,#0 /*contador*/
@@ -381,14 +402,14 @@ es_salir:
    ldrb r4,[r5,+r3]   /*si r4=a va a comparar si la proxima letra es d*/
    cmp r4,#0x61
    beq compararD /*con registro de desplazamiento*/
-   bne print_mensaje_error
+   bl print_mensaje_error
    b exit
  compararD:
    add r3,#1	/*incremento r3 para direc. relativo a registro*/
    ldrb r4,[r5,+r3]
    cmp r4,#0x64
    beq compararI
-   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que */
+   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que */
    /* sea 'a' seguido de otra letra, salto a mostrar el mensaje de error*/
    b exit /*si es distinto de adios sigue con el programa*/
  compararI:
@@ -396,7 +417,7 @@ es_salir:
    ldrb r4,[r5,+r3]
    cmp r4,#0x69
    beq compararO
-   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'ad'
+   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'ad'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    b exit
  compararO:
@@ -404,7 +425,7 @@ es_salir:
    ldrb r4,[r5,+r3]
    cmp r4,#0x6f
    beq compararS
-   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
+   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adi'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    b exit
  compararS:
@@ -412,7 +433,7 @@ es_salir:
    ldrb r4,[r5,+r3]
    cmp r4,#0x73
    beq compararEnter
-   bne print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
+   bl print_mensaje_error /*Ya que el bot no tiene ninguna operacion que sea 'adio'
    seguido de otra letra, salto a mostrar el mensaje de error*/
    b exit
  compararEnter:
@@ -420,7 +441,7 @@ es_salir:
    ldrb r4,[r5,+r3]
    cmp r4,#0x0a /*LF*/
    beq salir
-   bne print_mensaje_error
+   bl print_mensaje_error
    b exit
  salir:
    ldr r1,=mensaje_despedida
@@ -436,25 +457,18 @@ es_salir:
 
 .global main
 main:
-	/*ldr r1,=saludoInicial
+	ldr r1,=saludoInicial
 	ldr r2,=longSaludo
-	bl print*/
-        bl es_cuenta
-        ldr r1, =num1
-        ldr r1, [r1]
-        ldr r2, =num2
-        ldr r2, [r2]
+	bl print
 
-/*ciclo_main:		/*ciclo main*/
-	/*cmp r11,#1  /*r11 se setea en 1 en salir
+ciclo_main:		/*ciclo main*/
+	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
 	bl leer_input_usuario
-	bl es_cuenta*/ /*si es es_salir el mensaje de error manda a pedir al
-	usuario que escriba otra cosa*/
-	/*bl es_cuenta
-	bl imprimir_resultado*//*imprimir_resultado tiene que ser llamada 
-	en el calculo de las operaciones al finalizar la cuenta
-	bne ciclo_main*/
+	bl es_cuenta /*procesa el input del usuario*/
+	/*bl imprimir_resultado imprimir_resultado tiene que ser llamada 
+	en el calculo de las operaciones al finalizar la cuenta*/
+	bne ciclo_main
 fin:
    mov r7,#1
    swi 0

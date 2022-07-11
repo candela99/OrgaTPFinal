@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "           "
+  input_usuario: .asciz "              "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -357,10 +357,12 @@ imprimir_resultado:
    /*bl resultado_toString*/
    eor r2,r2
    eor r1,r1
-   ldr r1,=resultado
-   mov r7,#4
-   mov r0,#2
-   swi 0
+   bl resultado_toString
+   eor r2,r2
+   eor r1,r1
+   ldr r2,=long_resultadoString
+   ldr r1,=resultadoString
+   bl print
    eor r2,r2
    eor r1,r1
    ldr r1, =enter
@@ -370,14 +372,36 @@ imprimir_resultado:
    bx lr
  .fnend
 
-/*resultado_toString:
+
+resultado_toString:
  .fnstart
    push {lr}
-   ldr r3,=resultado
+   ldr r0,=resultado
+   ldr r1,[r0] /*r1=valor del resultado*/
+   mov r2,#10  /*Para convertir un número a ASCII, debe dividir el número por 10*/
+   eor r5,r5
+   divResultado:
+	cmp r1,r2
+	bge restarResultado
+	bal continuarDivision
+   restarResultado:
+    sub r1,r2
+	add r5,#1
+	bal divResultado
+   continuarDivision:
+	cmp r5,r2
+	mov r9,r1
+	mov r1,r5
+	blt divResultado
+    add r9,#0x30
+	add r5,#0x30
+	ldr r4,=resultadoString
+	strb r5,[r4]
+	strb r9,[r4,+#1]
    pop {lr}
    bx lr
  .fnend
-*/
+
 
 print_mensaje_error:/*print mensaje de error*/
  .fnstart
@@ -462,13 +486,13 @@ main:
 	bl print
 
 ciclo_main:		/*ciclo main*/
-	cmp r11,#1  /*r11 se setea en 1 en salir*/
-	beq fin
+	/*cmp r11,#1  /*r11 se setea en 1 en salir*/
+	/*beq fin
 	bl leer_input_usuario
 	bl es_cuenta /*procesa el input del usuario*/
-	/*bl imprimir_resultado imprimir_resultado tiene que ser llamada 
+	bl imprimir_resultado /*imprimir_resultado tiene que ser llamada 
 	en el calculo de las operaciones al finalizar la cuenta*/
-	bne ciclo_main
+	/*bne ciclo_main*/
 fin:
    mov r7,#1
    swi 0

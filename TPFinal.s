@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "              "
+  input_usuario: .asciz "-3 / 1            "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -17,6 +17,7 @@
   num2: .int 0
   signo_num2: .int 0 /*si es 1 es negativo*/
   cant_numeros_num2: .int 0
+  signo_resultado: .int 0
   resultado: .int 0
   resto: .int 0
   resultadoStringAlreves: .asciz "          "
@@ -377,6 +378,10 @@ division:
    ldr r2, =signo_num2
    ldr r2, [r2]
    eor r3, r1, r2
+   push {r11}
+   ldr r11,=signo_resultado
+   str r3,[r11]
+   pop {r11}
    bl resultado_negativo
    str r9,[r10] /*cargo el resultado en memoria*/
    pop {lr}
@@ -427,6 +432,18 @@ imprimir_resultado:
 resultado_toString:
  .fnstart
    push {lr}
+   cmp r3,#1 /*El resultado es neg*/
+   bne noNegativo
+   ldr r10,=resultadoString
+   mov r5,#0x2d
+   strb r5,[r10]
+   ldr r0,=resultado
+   ldr r4,[r0]
+   mov r5, #0xffffffff
+   eor r4, r5
+   add r4, #1
+   str r4,[r0]
+  noNegativo:
    ldr r4,=resultadoStringAlreves
    ldr r6,=long_resultadoStringAlreves
    mov r7,#0
@@ -559,7 +576,7 @@ main:
 ciclo_main:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
-	bl leer_input_usuario
+	/*bl leer_input_usuario*/
 	bl es_cuenta /*procesa el input del usuario*/
 	bne ciclo_main
 fin:

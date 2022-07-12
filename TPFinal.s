@@ -308,6 +308,7 @@ resolver_operacion:
    bl division
    bl imprimir_resultado
    pop {lr}
+   pop {lr}
    bx lr
  .fnend
 suma:

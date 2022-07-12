@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "-3 / 1            "
+  input_usuario: .asciz "              "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -305,41 +305,67 @@ resolver_operacion:
    bl suma
    bl resta
    bl multiplicacion
-   ldr r3,=resto /*r3=direccion en memoria del resto*/
+   /*ldr r3,=resto /*r3=direccion en memoria del resto*/
    bl division
    bl imprimir_resultado
+   pop {lr}
+   pop {lr}
    pop {lr}
    pop {lr}
    bx lr
  .fnend
 suma:
  .fnstart
+   push {lr}	 
    cmp r0,#0x2b
    beq sumar
    bx lr
  sumar:
+   eor r3,r3
    adds r9,r1,r2
+   ldr r1, =signo_num1
+   ldr r1, [r1]
+   ldr r2, =signo_num2
+   ldr r2, [r2]
+   eor r3, r1, r2
    str r9,[r10]
+   pop {lr}
    bx lr
  .fnend
 resta:
  .fnstart
+   push {lr}	 
    cmp r0,#0x2d
    beq restar
    bx lr
  restar:
-   sub r9,r1,r2
+   eor r3,r3
+   subs r9,r1,r2
+   ldr r1, =signo_num1
+   ldr r1, [r1]
+   ldr r2, =signo_num2
+   ldr r2, [r2]
+   eor r3, r1, r2
    str r9,[r10]
+   pop {lr}
    bx lr
  .fnend
 multiplicacion:
  .fnstart
+   push {lr}	 
    cmp r0,#0x2a
    beq multiplicar
    bx lr
  multiplicar:
-   mul r9,r1,r2
+   eor r3,r3
+   muls r9,r1,r2
+   ldr r1, =signo_num1
+   ldr r1, [r1]
+   ldr r2, =signo_num2
+   ldr r2, [r2]
+   eor r3, r1, r2
    str r9,[r10]
+   pop {lr}
    bx lr
  .fnend
 complemento_a2:
@@ -566,6 +592,20 @@ es_salir:
    bx lr
  .fnend
 
+clear_variables:
+ .fnstart
+   push {lr}
+    mov r3,#0
+	ldr r1,=num1
+    ldr r2,=num2
+	ldr r4,=resultado
+	str r3,[r1]
+	str r3,[r2]
+	str r3,[r4]
+   pop {lr}
+   bx lr
+ .fnend
+
 
 .global main
 main:
@@ -576,8 +616,9 @@ main:
 ciclo_main:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
-	/*bl leer_input_usuario*/
+	bl leer_input_usuario
 	bl es_cuenta /*procesa el input del usuario*/
+	bl clear_variables
 	bne ciclo_main
 fin:
    mov r7,#1

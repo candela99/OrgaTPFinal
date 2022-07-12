@@ -600,9 +600,35 @@ clear_variables:
 	ldr r1,=num1
     ldr r2,=num2
 	ldr r4,=resultado
+	ldr r5,=signo_num1
+    ldr r6,=signo_num2
 	str r3,[r1]
 	str r3,[r2]
 	str r3,[r4]
+	str r3,[r5]
+	str r3,[r6]
+	mov r3,#0x20
+	ldr r1,=resultadoString
+	ldr r2,=resultadoStringAlreves
+	ldr r4,=input_usuario
+	str r3,[r1]
+	str r3,[r1,#+4]
+	str r3,[r2]
+	str r3,[r2,#+4]
+	str r3,[r4]
+	str r3,[r4,#+4]
+	eor r1,r1
+	eor r2,r2
+	eor r3,r3
+	eor r4,r4
+	eor r5,r5
+	eor r6,r6
+	eor r7,r7
+	eor r8,r8
+	eor r9,r9
+	eor r10,r10
+	eor r11,r11
+	eor r12,r12
    pop {lr}
    bx lr
  .fnend
@@ -617,9 +643,9 @@ main:
 ciclo_main:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
+	bl clear_variables
 	bl leer_input_usuario
 	bl es_cuenta /*procesa el input del usuario*/
-	bl clear_variables
 	bne ciclo_main
 fin:
    mov r7,#1

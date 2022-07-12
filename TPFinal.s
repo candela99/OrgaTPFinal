@@ -322,24 +322,12 @@ suma:
    b salirSum
  sumar:
    eor r3,r3
-   ldr r3, =signo_num1
-   ldr r3, [r3]
-   ldr r4, =num1
-   ldr r4, [r4]
-   bl complemento_a2
-   mov r1, r4
-   ldr r3, =signo_num2
-   ldr r3, [r3]
-   ldr r4, =num2
-   ldr r4, [r4]
-   bl complemento_a2
-   mov r2, r4
    adds r9,r1,r2
    ldr r1, =signo_num1
    ldr r1, [r1]
    ldr r2, =signo_num2
    ldr r2, [r2]
-   eor r3, r1, r2
+   and r3, r1, r2
    ldr r11, =signo_resultado
    str r3, [r11]
    bl resultado_negativo
@@ -356,24 +344,13 @@ resta:
    b salirRes
  restar:
    eor r3,r3
-   ldr r3, =signo_num1
-   ldr r3, [r3]
-   ldr r4, =num1
-   ldr r4, [r4]
-   bl complemento_a2
-   mov r1, r4
-   ldr r3, =signo_num2
-   ldr r3, [r3]
-   ldr r4, =num2
-   ldr r4, [r4]
-   bl complemento_a2
-   mov r2, r4
-   subs r9,r1,r2
+   sub r9,r1,r2
    ldr r1, =signo_num1
    ldr r1, [r1]
    ldr r2, =signo_num2
    ldr r2, [r2]
-   eor r3, r1, r2
+   bl cambiar_signo
+   and r3, r1, r2
    ldr r11, =signo_resultado
    str r3, [r11]
    bl resultado_negativo
@@ -381,6 +358,15 @@ resta:
  salirRes:
    pop {lr}
    bx lr
+ .fnend
+cambiar_signo:
+ .fnstart 
+   cmp r2, #1 
+   beq cambiar
+   bx lr
+ cambiar:
+  mov r2, #0
+  bx lr
  .fnend
 multiplicacion:
  .fnstart

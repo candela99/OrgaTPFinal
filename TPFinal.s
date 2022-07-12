@@ -102,12 +102,14 @@ negativo:
  .fnstart
    cmp r4, #0x2D
    beq es_negativo
+   mov r2, #0
+   str r2, [r10]
    bx lr
  es_negativo:
    eor r1, r1
    mov r1, #0x2D
    mov r2, #1
-   strb r2, [r10]
+   str r2, [r10]
    strb r1, [r11, r5] /*r11 = puntero a vector_num1*/
    add r5, #+1 /*mueve el puntero de vector_num1 1 posicion*/
    add r8, #+1 /*incrementa el indice*/
@@ -459,7 +461,10 @@ imprimir_resultado:
 resultado_toString:
  .fnstart
    push {lr}
+   ldr r3, =signo_resultado
+   ldr r3, [r3]
    cmp r3,#1 /*El resultado es neg*/
+   mov r7, #0
    bne noNegativo
    ldr r10,=resultadoString
    mov r5,#0x2d
@@ -470,10 +475,10 @@ resultado_toString:
    eor r4, r5
    add r4, #1
    str r4,[r0]
+   add r7, #1
   noNegativo:
    ldr r4,=resultadoStringAlreves
    ldr r6,=long_resultadoStringAlreves
-   mov r7,#0
    ldr r0,=resultado
    ldr r1,[r0] /*r1=valor del resultado*/
    mov r2,#10  /*Para convertir un número a ASCII, debe dividir el número por 10*/
@@ -488,7 +493,7 @@ resultado_toString:
 	bal divResultado
    continuarDivision:
 	cmp r5,r2
-	mov r8,r1
+	mov r8,r1 /*r1 = valor del resultado*/
 	add r8,#0x30
 	strb r8,[r4,+r7]
 	add r7,#1
@@ -498,13 +503,13 @@ resultado_toString:
 	add r1,#0x30
 	strb r1,[r4,+r7]
 	ldr r10,=resultadoString
-	mov r7,#0
+        mov r7,#0 /*r7 = indice de resultado_toString*/   
    escribir:
 	 cmp r6,#0
 	 blt exit_resultado_toString
 	 ldrb r9,[r4,+r6]
 	 cmp r9,#0x20
-     bne anotar
+         bne anotar
 	 sub r6,#1
 	 b escribir
    anotar:
@@ -598,10 +603,12 @@ clear_variables:
    push {lr}
     mov r3,#0
 	ldr r1,=num1
-    ldr r2,=num2
+        ldr r2,=num2
 	ldr r4,=resultado
 	ldr r5,=signo_num1
-    ldr r6,=signo_num2
+        ldr r6,=signo_num2
+        ldr r7, =signo_resultado
+        str r3, [r7]
 	str r3,[r1]
 	str r3,[r2]
 	str r3,[r4]

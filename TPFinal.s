@@ -461,8 +461,6 @@ imprimir_resultado:
 resultado_toString:
  .fnstart
    push {lr}
-   ldr r3, =signo_resultado
-   ldr r3, [r3]
    cmp r3,#1 /*El resultado es neg*/
    mov r7, #0
    bne noNegativo

@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "-3 / 1              "
+  input_usuario: .asciz "                "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -19,6 +19,8 @@
   cant_numeros_num2: .int 0
   resultado: .int 0
   resto: .int 0
+  resultadoStringAlreves: .asciz "             "
+  long_resultadoStringAlreves = . -resultadoStringAlreves
   resultadoString: .asciz "             "
   long_resultadoString = . -resultadoString
   mensaje_despedida: .asciz "Adios! \n"
@@ -403,7 +405,6 @@ imprimir_resultado:
    ldr r2,=long_msj_resultado
    ldr r1,=mensaje_resultado
    bl print
-   /*bl resultado_toString*/
    eor r2,r2
    eor r1,r1
    bl resultado_toString
@@ -421,10 +422,12 @@ imprimir_resultado:
    bx lr
  .fnend
 
-
 resultado_toString:
  .fnstart
    push {lr}
+   ldr r4,=resultadoStringAlreves
+   ldr r6,=long_resultadoStringAlreves
+   mov r7,#0
    ldr r0,=resultado
    ldr r1,[r0] /*r1=valor del resultado*/
    mov r2,#10  /*Para convertir un número a ASCII, debe dividir el número por 10*/
@@ -439,14 +442,31 @@ resultado_toString:
 	bal divResultado
    continuarDivision:
 	cmp r5,r2
-	mov r9,r1
+	mov r8,r1
+	add r8,#0x30
+	strb r8,[r4,+r7]
+	add r7,#1
 	mov r1,r5
-	blt divResultado
-    add r9,#0x30
-	add r5,#0x30
-	ldr r4,=resultadoString
-	strb r5,[r4]
-	strb r9,[r4,+#1]
+	eor r5,r5
+	bge divResultado
+	add r1,#0x30
+	strb r1,[r4,+r7]
+	ldr r10,=resultadoString
+	mov r7,#0
+   escribir:
+	 cmp r6,#0
+	 blt exit_resultado_toString
+	 ldrb r9,[r4,+r6]
+	 cmp r9,#0x20
+     bne anotar
+	 sub r6,#1
+	 b escribir
+   anotar:
+     strb r9,[r10,+r7]
+	 add r7,#1
+	 sub r6,#1
+	 b escribir
+   exit_resultado_toString:
    pop {lr}
    bx lr
  .fnend
@@ -535,13 +555,11 @@ main:
 	bl print
 
 ciclo_main:		/*ciclo main*/
-	/*cmp r11,#1  /*r11 se setea en 1 en salir*/
-	/*beq fin*/
-	/*bl leer_input_usuario*/
+	cmp r11,#1  /*r11 se setea en 1 en salir*/
+	eq fin
+	bl leer_input_usuario
 	bl es_cuenta /*procesa el input del usuario*/
-	/*bl imprimir_resultado /*imprimir_resultado tiene que ser llamada 
-	en el calculo de las operaciones al finalizar la cuenta*/
-	/*bne ciclo_main*/
+	bne ciclo_main
 fin:
    mov r7,#1
    swi 0

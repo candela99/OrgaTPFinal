@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "                "
+  input_usuario: .asciz "              "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -19,9 +19,9 @@
   cant_numeros_num2: .int 0
   resultado: .int 0
   resto: .int 0
-  resultadoStringAlreves: .asciz "             "
+  resultadoStringAlreves: .asciz "          "
   long_resultadoStringAlreves = . -resultadoStringAlreves
-  resultadoString: .asciz "             "
+  resultadoString: .asciz "          "
   long_resultadoString = . -resultadoString
   mensaje_despedida: .asciz "Adios! \n"
   long_despedida = . - mensaje_despedida
@@ -317,7 +317,7 @@ suma:
    bx lr
  sumar:
    adds r9,r1,r2
-   strb r9,[r10]
+   str r9,[r10]
    bx lr
  .fnend
 resta:
@@ -327,7 +327,7 @@ resta:
    bx lr
  restar:
    sub r9,r1,r2
-   strb r9,[r10]
+   str r9,[r10]
    bx lr
  .fnend
 multiplicacion:
@@ -337,7 +337,7 @@ multiplicacion:
    bx lr
  multiplicar:
    mul r9,r1,r2
-   strb r9,[r10]
+   str r9,[r10]
    bx lr
  .fnend
 complemento_a2:

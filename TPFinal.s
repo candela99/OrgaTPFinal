@@ -322,12 +322,27 @@ suma:
    b salirSum
  sumar:
    eor r3,r3
+   ldr r3, =signo_num1
+   ldr r3, [r3]
+   ldr r4, =num1
+   ldr r4, [r4]
+   bl complemento_a2
+   mov r1, r4
+   ldr r3, =signo_num2
+   ldr r3, [r3]
+   ldr r4, =num2
+   ldr r4, [r4]
+   bl complemento_a2
+   mov r2, r4
    adds r9,r1,r2
    ldr r1, =signo_num1
    ldr r1, [r1]
    ldr r2, =signo_num2
    ldr r2, [r2]
    eor r3, r1, r2
+   ldr r11, =signo_resultado
+   str r3, [r11]
+   bl resultado_negativo
    str r9,[r10]
  salirSum:
    pop {lr}
@@ -341,12 +356,27 @@ resta:
    b salirRes
  restar:
    eor r3,r3
+   ldr r3, =signo_num1
+   ldr r3, [r3]
+   ldr r4, =num1
+   ldr r4, [r4]
+   bl complemento_a2
+   mov r1, r4
+   ldr r3, =signo_num2
+   ldr r3, [r3]
+   ldr r4, =num2
+   ldr r4, [r4]
+   bl complemento_a2
+   mov r2, r4
    subs r9,r1,r2
    ldr r1, =signo_num1
    ldr r1, [r1]
    ldr r2, =signo_num2
    ldr r2, [r2]
    eor r3, r1, r2
+   ldr r11, =signo_resultado
+   str r3, [r11]
+   bl resultado_negativo
    str r9,[r10]
  salirRes:
    pop {lr}
@@ -360,12 +390,27 @@ multiplicacion:
    b salirMul
  multiplicar:
    eor r3,r3
+   ldr r3, =signo_num1
+   ldr r3, [r3]
+   ldr r4, =num1
+   ldr r4, [r4]
+   bl complemento_a2
+   mov r1, r4
+   ldr r3, =signo_num2
+   ldr r3, [r3]
+   ldr r4, =num2
+   ldr r4, [r4]
+   bl complemento_a2
+   mov r2, r4
    muls r9,r1,r2
    ldr r1, =signo_num1
    ldr r1, [r1]
    ldr r2, =signo_num2
    ldr r2, [r2]
    eor r3, r1, r2
+   ldr r11, =signo_resultado
+   str r3, [r11]
+   bl resultado_negativo
    str r9,[r10]
  salirMul:  
    pop {lr}

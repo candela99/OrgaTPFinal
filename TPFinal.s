@@ -1,5 +1,5 @@
 .data
-  input_usuario: .asciz "10 + 1              "
+  input_usuario: .asciz "              "
   long_input = . - input_usuario
   mensaje_error: .asciz "Lo siento, mis respuestas son limitadas \n"
   long_error = . - mensaje_error
@@ -255,8 +255,8 @@ ciclo_numero: /*recorre nro x nro, (recorre el vector)*/
  .fnend
  potencia_1:
  .fnstart
-  mov r4, #1
-  mul r12, r11, r4
+  mov r7, #1
+  mul r12, r11, r7
   mov r11, r12
   sub r9, #1
   pop {lr} 
@@ -558,7 +558,7 @@ main:
 ciclo_main:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
 	beq fin
-	/*bl leer_input_usuario*/
+	bl leer_input_usuario
 	bl es_cuenta /*procesa el input del usuario*/
 	bne ciclo_main
 fin:

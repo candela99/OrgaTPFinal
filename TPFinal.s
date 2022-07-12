@@ -310,8 +310,6 @@ resolver_operacion:
    bl imprimir_resultado
    pop {lr}
    pop {lr}
-   pop {lr}
-   pop {lr}
    bx lr
  .fnend
 suma:
@@ -319,7 +317,7 @@ suma:
    push {lr}	 
    cmp r0,#0x2b
    beq sumar
-   bx lr
+   b salirSum
  sumar:
    eor r3,r3
    adds r9,r1,r2
@@ -329,15 +327,16 @@ suma:
    ldr r2, [r2]
    eor r3, r1, r2
    str r9,[r10]
+ salirSum:
    pop {lr}
-   bx lr
+   bx lr   
  .fnend
 resta:
  .fnstart
    push {lr}	 
    cmp r0,#0x2d
    beq restar
-   bx lr
+   b salirRes
  restar:
    eor r3,r3
    subs r9,r1,r2
@@ -347,6 +346,7 @@ resta:
    ldr r2, [r2]
    eor r3, r1, r2
    str r9,[r10]
+ salirRes:
    pop {lr}
    bx lr
  .fnend
@@ -355,7 +355,7 @@ multiplicacion:
    push {lr}	 
    cmp r0,#0x2a
    beq multiplicar
-   bx lr
+   b salirMul
  multiplicar:
    eor r3,r3
    muls r9,r1,r2
@@ -365,6 +365,7 @@ multiplicacion:
    ldr r2, [r2]
    eor r3, r1, r2
    str r9,[r10]
+ salirMul:  
    pop {lr}
    bx lr
  .fnend

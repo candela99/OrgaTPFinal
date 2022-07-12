@@ -306,6 +306,7 @@ resolver_operacion:
    bl multiplicacion
    ldr r3,=resto /*r3=direccion en memoria del resto*/
    bl division
+   bl imprimir_resultado
    pop {lr}
    bx lr
  .fnend
@@ -556,7 +557,7 @@ main:
 
 ciclo_main:		/*ciclo main*/
 	cmp r11,#1  /*r11 se setea en 1 en salir*/
-	eq fin
+	beq fin
 	bl leer_input_usuario
 	bl es_cuenta /*procesa el input del usuario*/
 	bne ciclo_main
